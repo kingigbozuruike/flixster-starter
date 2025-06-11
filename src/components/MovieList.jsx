@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import MovieCard from './MovieCard';
-import { use } from 'react';
 import './MovieList.css'
 
 const MovieList = () => {
@@ -41,7 +40,7 @@ const MovieList = () => {
             <h2>Movie List</h2>
             <div className="movie-list-grid">
                 {data.map((movie) => (
-                    <MovieCard img={`https://image.tmdb.org/t/p/w300${movie.poster_path}`} title={movie.title} rating={movie.vote_average} />
+                    <MovieCard key={movie.id} img={`https://image.tmdb.org/t/p/w300${movie.poster_path}`} title={movie.title} rating={movie.vote_average} />
                 ))}
             </div>
             {loading && <p>Loading...</p>}
