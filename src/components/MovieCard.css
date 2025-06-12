@@ -19,3 +19,7 @@
     border: 1px solid #b60000;
     border-radius: 10px;
 }
+
+.movieicons img {
+    height: 25px;
+}
