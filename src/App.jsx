@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import MovieList from './components/MovieList'
+import MovieList from './components/NowPlaying'
 import Search from './components/Search'
 import { Routes, Route } from 'react-router-dom'
 

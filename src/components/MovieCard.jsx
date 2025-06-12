@@ -1,9 +1,10 @@
 import React from 'react';
 import './MovieCard.css';
 
-const MovieCard = ({img, title, rating}) => {
+
+const MovieCard = ({img, title, rating, handleOpen}) => {
     return (
-        <div className='moviecard'>
+        <div className='moviecard' onClick={handleOpen}>
             <div className='imageholder'>
                 <img src={img} alt='movie poster'/>
             </div>

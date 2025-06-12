@@ -1,54 +1,33 @@
-import React, { useEffect, useState } from "react";
-import MovieCard from "./MovieCard";
-import "./Search.css";
-import Navbar from "./Navbar";
-import Modal from "./Modal";
+import React, { useEffect, useState } from 'react';
+import MovieCard from './MovieCard';
+import './NowPlaying.css'
+import Navbar from './Navbar';
+import Modal from './Modal';
 
-const Search = () => {
-    const [searchQuery, setSearchQuery] = useState("");
+const NowPlaying = () => {
     const [data, setData] = useState([]);
+    const [sortMethod, setSortMethod] = useState('none');
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
     const [error, setError] = useState(null);
-    const [sortMethod, setSortMethod] = useState('none');
-    const [filterGenre, setFilterGenre] = useState('all');
 
-    const handleSearchChange = (event) => {
-        setSearchQuery(event.target.value);
-    };
-
-    const api_key = import.meta.env.VITE_API_KEY;
-    //call api for search results
-    const searchResults = async (isNewSearch = false) => {
+    const fetchMovies = async () => {
         setLoading(true);
         try {
-            if (isNewSearch) {
-                setPage(1);
-                setData([]);
-            }
-            const query = searchQuery.toLowerCase().replace(/ /g, "+");
-            const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${query}&api_key=${api_key}&page=${page}`);
+            const apiKey = import.meta.env.VITE_API_KEY;
+            const response = await fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&page=${page}`);
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error('Network response was not ok');
             }
             const data = await response.json();
             setData(prevData => [...prevData, ...data.results]);
             setHasMore(data.page < data.total_pages);
-        } catch (error) {
-            setError(error.message);
+        } catch (err) {
+            setError(err.message);
         } finally {
             setLoading(false);
         }
-    };
-    useEffect(() => {
-        if (page > 1) {
-            searchResults();
-        }
-    }, [page]);
-
-    const loadMore = () => {
-        setPage(prevPage => prevPage + 1);
     };
 
     const [genres, setGenres] = useState([]);
@@ -66,40 +45,14 @@ const Search = () => {
         return genreIds.map(id => genres.find(genre => genre.id === id)?.name).filter(Boolean).join(', ');
     };
 
-    // Sorting function
-    const sortMovies = (movies) => {
-        if (!movies) return [];
+    useEffect(() => {
+        fetchMovies();
+        console.log(page);
+    }, [page]);
 
-        const sortedMovies = [...movies];
-
-        switch (sortMethod) {
-            case 'title':
-                return sortedMovies.sort((a, b) => a.title.localeCompare(b.title));
-            case 'date':
-                return sortedMovies.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
-            case 'rating':
-                return sortedMovies.sort((a, b) => b.vote_average - a.vote_average);
-            default:
-                return sortedMovies;
-        }
+    const loadMore = () => {
+        setPage(prevPage => prevPage + 1);
     };
-
-    // Filtering function
-    const filterMovies = (movies) => {
-        if (filterGenre === 'all') {
-            return movies;
-        }
-
-        // Convert filterGenre to number since genre IDs are numbers
-        const genreId = Number(filterGenre);
-        return movies.filter(movie => movie.genre_ids.includes(genreId));
-    };
-
-    // Calculate genre counts
-    const genreCounts = genres.map(genre => {
-        const count = data.filter(movie => movie.genre_ids.includes(genre.id)).length;
-        return { ...genre, count };
-    });
     //modal for movie details
     const [showModal, setShowModal] = useState(false);
     const [selectedMovie, setSelectedMovie] = useState(null);
@@ -121,15 +74,45 @@ const Search = () => {
     });
     openModal();};
 
-    return (
-    <div>
-        <Navbar />
-        <h1>Search</h1>
-        <div className="search">
-            <input type="text" value={searchQuery} onChange={handleSearchChange} placeholder="Search" />
-            <button onClick={() => searchResults(true)}>Search</button>
+    const sortMovies = (movies) => {
+        if (!movies) return [];
 
-            {data.length > 0 && (
+        const sortedMovies = [...movies];
+
+        switch (sortMethod) {
+            case 'title':
+                return sortedMovies.sort((a, b) => a.title.localeCompare(b.title));
+            case 'date':
+                return sortedMovies.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
+            case 'rating':
+                return sortedMovies.sort((a, b) => b.vote_average - a.vote_average);
+            default:
+                return sortedMovies;
+        }
+    };
+
+    const [filterGenre, setFilterGenre] = useState('all');
+    const filterMovies = (movies) => {
+        if (filterGenre === 'all') {
+            return movies;
+        }
+
+        // Convert filterGenre to number since genre IDs are numbers
+        const genreId = Number(filterGenre);
+        return movies.filter(movie => movie.genre_ids.includes(genreId));
+    };
+
+    // Calculate genre counts
+    const genreCounts = genres.map(genre => {
+        const count = data.filter(movie => movie.genre_ids.includes(genre.id)).length;
+        return { ...genre, count };
+    });
+
+    return (
+        <div className="container">
+            <Navbar/>
+            <div className="movie-list">
+                <h2>Movie List</h2>
                 <div className='sort-filter'>
                     <div className="sort-container">
                         <label htmlFor="sort-select">Sort by: </label>
@@ -161,30 +144,28 @@ const Search = () => {
                         </select>
                     </div>
                 </div>
-            )}
-
-            <div className="movie-list-grid">
-                {filterMovies(sortMovies(data)).map((movie) => (
-                    <MovieCard img={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}  title={movie.title} rating={movie.vote_average} handleOpen={() => storeMovieData(movie)}/>
-                ))}
+                <div className="movie-list-grid">
+                    {filterMovies(sortMovies(data)).map((movie) => (
+                        <MovieCard key={movie.id} img={`https://image.tmdb.org/t/p/w300${movie.poster_path}`} title={movie.title} rating={movie.vote_average} handleOpen={() => storeMovieData(movie)}/>
+                    ))}
+                </div>
+                {loading && <p>Loading...</p>}
+                {hasMore && !loading && <button onClick={loadMore} disabled={loading}>Load More</button>}
+                {!hasMore && !loading && <p>No more movies to load</p>}
+                {error && <p className="error-message">Error: {error}</p>}
+                {showModal && selectedMovie && (
+                    <Modal
+                    title={selectedMovie.title}
+                    src={selectedMovie.src}
+                    rating={selectedMovie.rating}
+                    date={selectedMovie.date}
+                    overview={selectedMovie.overview}
+                    genre={getGenreNames(selectedMovie.genre)}
+                    handleClose={closeModal}
+                />)}
             </div>
-            {loading && <p>Loading...</p>}
-            {data.length > 0 && hasMore && !loading && <button onClick={loadMore} disabled={loading}>Load More</button>}
-            {!hasMore && !loading && <p>No more movies to load</p>}
-            {error && <p className="error-message">Error: {error}</p>}
-            {showModal && selectedMovie && (
-                <Modal
-                title={selectedMovie.title}
-                src={selectedMovie.src}
-                rating={selectedMovie.rating}
-                date={selectedMovie.date}
-                overview={selectedMovie.overview}
-                genre={getGenreNames(selectedMovie.genre)}
-                handleClose={closeModal}
-            />)}
         </div>
-    </div>
     );
-};
+}
 
-export default Search;
+export default NowPlaying;
