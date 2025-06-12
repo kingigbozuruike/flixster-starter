@@ -114,6 +114,12 @@ const NowPlaying = () => {
         setLikedMovies(prev => ({ ...prev, [movieId]: isLiked }));
         console.log(likedMovies);
     };
+    //watched movies
+    const [watchedMovies, setWatchedMovies] = useState({});
+    const handleWatchedChange = (movieId, isWatched) => {
+        setWatchedMovies(prev => ({ ...prev, [movieId]: isWatched }));
+        console.log(watchedMovies);
+    };
         return (
         <div className="container">
             <Navbar/>
@@ -152,7 +158,7 @@ const NowPlaying = () => {
                 </div>
                 <div className="movie-list-grid">
                     {filterMovies(sortMovies(data)).map((movie) => (
-                        <MovieCard key={movie.id} img={`https://image.tmdb.org/t/p/w300${movie.poster_path}`} title={movie.title} rating={movie.vote_average} liked={likedMovies[movie.id] || false} onLikeChange={(isLiked) => handleLikeChange(movie.id, isLiked)} handleOpen={() => storeMovieData(movie)}/>
+                        <MovieCard key={movie.id} img={`https://image.tmdb.org/t/p/w300${movie.poster_path}`} title={movie.title} rating={movie.vote_average} liked={likedMovies[movie.id] || false} onLikeChange={(isLiked) => handleLikeChange(movie.id, isLiked)} watched={watchedMovies[movie.id] || false} onWatchedChange={(isWatched) => handleWatchedChange(movie.id, isWatched)} handleOpen={() => storeMovieData(movie)}/>
                     ))}
                 </div>
                 {loading && <p>Loading...</p>}
