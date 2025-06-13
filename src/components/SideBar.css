@@ -1,0 +1,109 @@
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  right: 0;
+  top: 0;
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 20px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  overflow-y: auto;
+  padding-top: 80px; /* Space for the header */
+}
+
+.sidebar-header {
+  margin-bottom: 20px;
+}
+
+.sidebar-header h3 {
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+  color: #fff;
+  text-align: center;
+}
+
+.sidebar-tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.sidebar-tabs button {
+  padding: 8px 0;
+  width: 48%;
+  background-color: #333;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.sidebar-tabs button.active {
+  background-color: #b60000;
+}
+
+.sidebar-tabs button:hover:not(.active) {
+  background-color: #444;
+}
+
+.movie-list-sidebar {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.movie-item {
+  display: flex;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #333;
+}
+
+.movie-thumbnail {
+  width: 50px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.movie-details {
+  flex: 1;
+}
+
+.movie-details h4 {
+  margin: 0 0 5px 0;
+  font-size: 0.9rem;
+}
+
+.movie-details p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #ccc;
+}
+
+.empty-message {
+  text-align: center;
+  color: #888;
+  margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: 100vh;
+    right: -100%;
+    transition: right 0.3s ease;
+  }
+
+  .sidebar.open {
+    right: 0;
+  }
+
+}

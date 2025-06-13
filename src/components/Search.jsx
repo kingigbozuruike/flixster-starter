@@ -4,7 +4,7 @@ import "./Search.css";
 import Navbar from "./Navbar";
 import Modal from "./Modal";
 
-const Search = () => {
+const Search = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange, onAddMovie }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -19,7 +19,6 @@ const Search = () => {
     };
 
     const api_key = import.meta.env.VITE_API_KEY;
-    //call api for search results
     const searchResults = async (isNewSearch = false) => {
         setLoading(true);
         try {
@@ -89,17 +88,26 @@ const Search = () => {
         if (filterGenre === 'all') {
             return movies;
         }
-
-        // Convert filterGenre to number since genre IDs are numbers
         const genreId = Number(filterGenre);
         return movies.filter(movie => movie.genre_ids.includes(genreId));
     };
 
-    // Calculate genre counts
+
     const genreCounts = genres.map(genre => {
         const count = data.filter(movie => movie.genre_ids.includes(genre.id)).length;
         return { ...genre, count };
     });
+
+
+    useEffect(() => {
+        if (data.length > 0) {
+            data.forEach(movie => {
+                if (onAddMovie) {
+                    onAddMovie(movie);
+                }
+            });
+        }
+    }, [data, onAddMovie]);
     //modal for movie details
     const [showModal, setShowModal] = useState(false);
     const [selectedMovie, setSelectedMovie] = useState(null);
@@ -117,7 +125,7 @@ const Search = () => {
             rating: movie.vote_average,
             date: movie.release_date,
             overview: movie.overview,
-            genre: movie.genre_ids, // Assuming genre_ids are numbers, you might need to map them to genre names
+            genre: movie.genre_ids,
     });
     openModal();};
 
@@ -165,7 +173,17 @@ const Search = () => {
 
             <div className="movie-list-grid">
                 {filterMovies(sortMovies(data)).map((movie) => (
-                    <MovieCard img={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}  title={movie.title} rating={movie.vote_average} handleOpen={() => storeMovieData(movie)}/>
+                    <MovieCard
+                        key={movie.id}
+                        img={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
+                        title={movie.title}
+                        rating={movie.vote_average}
+                        liked={likedMovies[movie.id] || false}
+                        onLikeChange={(isLiked) => onLikeChange(movie.id, isLiked)}
+                        watched={watchedMovies[movie.id] || false}
+                        onWatchedChange={(isWatched) => onWatchedChange(movie.id, isWatched)}
+                        handleOpen={() => storeMovieData(movie)}
+                    />
                 ))}
             </div>
             {loading && <p>Loading...</p>}

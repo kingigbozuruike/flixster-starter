@@ -2,6 +2,20 @@
   text-align: center;
 }
 
+.content-container {
+  transition: padding-right 0.3s ease;
+}
+
+.with-sidebar .content-container {
+  padding-right: 250px;
+}
+
+@media (max-width: 768px) {
+  .with-sidebar .content-container {
+    padding-right: 0;
+  }
+}
+
 .App-header {
   background-color: #282c34;
   display: flex;
@@ -10,6 +24,32 @@
   justify-content: space-evenly;
   color: white;
   padding: 20px;
+}
+
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1001;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #b60000;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: flex;
+  }
 }
 
 @media (max-width: 600px) {
