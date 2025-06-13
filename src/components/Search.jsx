@@ -118,16 +118,71 @@ const Search = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange, onA
         setShowModal(false);
     };
 
-    const storeMovieData = (movie) => {
-        setSelectedMovie ({
-            title: movie.title,
-            src: `https://image.tmdb.org/t/p/w300${movie.poster_path}`,
-            rating: movie.vote_average,
-            date: movie.release_date,
-            overview: movie.overview,
-            genre: movie.genre_ids,
-    });
-    openModal();};
+    const storeMovieData = async (movie) => {
+        try {
+            // Fetch movie videos to get the trailer
+            const apiKey = import.meta.env.VITE_API_KEY;
+            const response = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=${apiKey}`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch movie trailer');
+            }
+
+            const data = await response.json();
+
+            // Find the official trailer or use the first video
+            let trailerKey = null;
+            if (data.results && data.results.length > 0) {
+                // Try to find an official trailer first
+                const trailer = data.results.find(
+                    video => video.type === 'Trailer' && video.site === 'YouTube' &&
+                    (video.name.toLowerCase().includes('official') || video.name.toLowerCase().includes('trailer'))
+                );
+
+                // If no official trailer, use any trailer
+                if (!trailer) {
+                    const anyTrailer = data.results.find(
+                        video => video.type === 'Trailer' && video.site === 'YouTube'
+                    );
+
+                    // If no trailer at all, use any YouTube video
+                    if (!anyTrailer) {
+                        const anyVideo = data.results.find(video => video.site === 'YouTube');
+                        if (anyVideo) trailerKey = anyVideo.key;
+                    } else {
+                        trailerKey = anyTrailer.key;
+                    }
+                } else {
+                    trailerKey = trailer.key;
+                }
+            }
+
+            setSelectedMovie({
+                title: movie.title,
+                src: `https://image.tmdb.org/t/p/w300${movie.poster_path}`,
+                rating: movie.vote_average,
+                date: movie.release_date,
+                overview: movie.overview,
+                genre: movie.genre_ids,
+                trailerKey: trailerKey
+            });
+
+            openModal();
+        } catch (error) {
+            console.error('Error fetching movie trailer:', error);
+            // Still show the modal but without a trailer
+            setSelectedMovie({
+                title: movie.title,
+                src: `https://image.tmdb.org/t/p/w300${movie.poster_path}`,
+                rating: movie.vote_average,
+                date: movie.release_date,
+                overview: movie.overview,
+                genre: movie.genre_ids,
+                trailerKey: null
+            });
+            openModal();
+        }
+    };
 
     return (
     <div>
@@ -192,14 +247,16 @@ const Search = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange, onA
             {error && <p className="error-message">Error: {error}</p>}
             {showModal && selectedMovie && (
                 <Modal
-                title={selectedMovie.title}
-                src={selectedMovie.src}
-                rating={selectedMovie.rating}
-                date={selectedMovie.date}
-                overview={selectedMovie.overview}
-                genre={getGenreNames(selectedMovie.genre)}
-                handleClose={closeModal}
-            />)}
+                    title={selectedMovie.title}
+                    src={selectedMovie.src}
+                    rating={selectedMovie.rating}
+                    date={selectedMovie.date}
+                    overview={selectedMovie.overview}
+                    genre={getGenreNames(selectedMovie.genre)}
+                    trailerKey={selectedMovie.trailerKey}
+                    handleClose={closeModal}
+                />
+            )}
         </div>
     </div>
     );

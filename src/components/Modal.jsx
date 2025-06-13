@@ -1,7 +1,7 @@
 import React from "react";
 import "./Modal.css";
 
-const Modal = ({title, src, rating, date, overview, genre, handleClose}) => {
+const Modal = ({title, src, rating, date, overview, genre, trailerKey, handleClose}) => {
     return (
         <div className="modal">
             <div className="modal-content">
@@ -12,6 +12,21 @@ const Modal = ({title, src, rating, date, overview, genre, handleClose}) => {
                     <p>Release Date: {date}</p>
                     <p>Overview: {overview}</p>
                     <p>Genres: {genre} </p>
+                </div>
+                <div className="youtube">
+                    {trailerKey ? (
+                        <iframe
+                            width="560"
+                            height="315"
+                            src={`https://www.youtube.com/embed/${trailerKey}`}
+                            title="YouTube video player"
+                            style={{border: 'none'}}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        ></iframe>
+                    ) : (
+                        <p>No trailer available</p>
+                    )}
                 </div>
                 <div className="modal-btns">
                     <button onClick={handleClose}>Close</button>
