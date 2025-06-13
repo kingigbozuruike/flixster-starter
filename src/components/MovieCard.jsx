@@ -37,7 +37,11 @@ const MovieCard = ({img, title, rating, handleOpen, liked=false, watched = false
     return (
         <div className='moviecard' onClick={handleOpen}>
             <div className='imageholder'>
-                <img src={img} alt='movie poster'/>
+                <img
+                    src={img && img.includes('null') ? 'https://popcornusa.s3.amazonaws.com/placeholder-movieimage.png' : img}
+                    alt='movie poster'
+                    onError={(e) => {e.target.src = 'https://popcornusa.s3.amazonaws.com/placeholder-movieimage.png'}}
+                />
             </div>
             <div className='movieinfo'>
                 <h3 style={{fontSize: title.length > 25? '0.9rem' : '1.2rem'}}>{title}</h3>
@@ -45,7 +49,7 @@ const MovieCard = ({img, title, rating, handleOpen, liked=false, watched = false
             </div>
             <div className='movieicons'>
                 <img
-                    src={isLiked ? "heart_red.png" : "heart.png"}
+                    src={isLiked ? "heart_red.png" : "heart.ico"}
                     alt="like button"
                     className="like"
                     onClick={handleLike}

@@ -1,18 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import MovieCard from './MovieCard';
 import './NowPlaying.css'
-import Navbar from './Navbar';
 import Modal from './Modal';
 
-const NowPlaying = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange, onAddMovie }) => {
-    const [data, setData] = useState([]);
+const NowPlaying = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange, onAddMovie, isSearching, searchQuery }) => {
+    // State for now playing movies
+    const [nowPlayingData, setNowPlayingData] = useState([]);
+    // State for search results
+    const [searchData, setSearchData] = useState([]);
+
     const [sortMethod, setSortMethod] = useState('none');
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
     const [error, setError] = useState(null);
 
+    // Get the active data based on whether we're searching or not
+    const data = isSearching ? searchData : nowPlayingData;
+
     const fetchMovies = async () => {
+        if (isSearching) return; // Don't fetch now playing movies if we're searching
+
         setLoading(true);
         try {
             const apiKey = import.meta.env.VITE_API_KEY;
@@ -21,7 +29,7 @@ const NowPlaying = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange,
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            setData(prevData => [...prevData, ...data.results]);
+            setNowPlayingData(prevData => [...prevData, ...data.results]);
             setHasMore(data.page < data.total_pages);
         } catch (err) {
             setError(err.message);
@@ -29,6 +37,38 @@ const NowPlaying = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange,
             setLoading(false);
         }
     };
+
+    // Search function - now triggered by searchQuery prop change
+    useEffect(() => {
+        const performSearch = async () => {
+            if (!searchQuery) return;
+
+            setLoading(true);
+            setError(null);
+            try {
+                const apiKey = import.meta.env.VITE_API_KEY;
+                const formattedQuery = searchQuery.toLowerCase().replace(/ /g, "+");
+                const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${formattedQuery}&api_key=${apiKey}&page=1`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                setSearchData(data.results);
+                setHasMore(data.page < data.total_pages);
+                setPage(1);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (isSearching && searchQuery) {
+            performSearch();
+        }
+    }, [searchQuery, isSearching]);
 
     const [genres, setGenres] = useState([]);
     useEffect (() => {
@@ -46,9 +86,10 @@ const NowPlaying = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange,
     };
 
     useEffect(() => {
-        fetchMovies();
-        console.log(page);
-    }, [page]);
+        if (!isSearching) {
+            fetchMovies();
+        }
+    }, [page, isSearching]);
 
     const loadMore = () => {
         setPage(prevPage => prevPage + 1);
@@ -65,34 +106,46 @@ const NowPlaying = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange,
 
     const storeMovieData = async (movie) => {
         try {
-            // Fetch movie videos to get the trailer
             const apiKey = import.meta.env.VITE_API_KEY;
-            const response = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=${apiKey}`);
 
-            if (!response.ok) {
+            // Fetch movie details to get runtime
+            const detailsResponse = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}?api_key=${apiKey}`);
+
+            if (!detailsResponse.ok) {
+                throw new Error('Failed to fetch movie details');
+            }
+
+            const movieDetails = await detailsResponse.json();
+            const runtime = movieDetails.runtime;
+            const backdropPath = movieDetails.backdrop_path;
+
+            // Fetch movie videos to get the trailer
+            const videosResponse = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=${apiKey}`);
+
+            if (!videosResponse.ok) {
                 throw new Error('Failed to fetch movie trailer');
             }
 
-            const data = await response.json();
+            const videosData = await videosResponse.json();
 
             // Find the official trailer or use the first video
             let trailerKey = null;
-            if (data.results && data.results.length > 0) {
+            if (videosData.results && videosData.results.length > 0) {
                 // Try to find an official trailer first
-                const trailer = data.results.find(
+                const trailer = videosData.results.find(
                     video => video.type === 'Trailer' && video.site === 'YouTube' &&
                     (video.name.toLowerCase().includes('official') || video.name.toLowerCase().includes('trailer'))
                 );
 
                 // If no official trailer, use any trailer
                 if (!trailer) {
-                    const anyTrailer = data.results.find(
+                    const anyTrailer = videosData.results.find(
                         video => video.type === 'Trailer' && video.site === 'YouTube'
                     );
 
                     // If no trailer at all, use any YouTube video
                     if (!anyTrailer) {
-                        const anyVideo = data.results.find(video => video.site === 'YouTube');
+                        const anyVideo = videosData.results.find(video => video.site === 'YouTube');
                         if (anyVideo) trailerKey = anyVideo.key;
                     } else {
                         trailerKey = anyTrailer.key;
@@ -105,25 +158,29 @@ const NowPlaying = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange,
             setSelectedMovie({
                 title: movie.title,
                 src: `https://image.tmdb.org/t/p/w300${movie.poster_path}`,
+                backdropSrc: backdropPath ? `https://image.tmdb.org/t/p/original${backdropPath}` : null,
                 rating: movie.vote_average,
                 date: movie.release_date,
                 overview: movie.overview,
                 genre: movie.genre_ids,
-                trailerKey: trailerKey
+                trailerKey: trailerKey,
+                runtime: runtime
             });
 
             openModal();
         } catch (error) {
-            console.error('Error fetching movie trailer:', error);
-            // Still show the modal but without a trailer
+            console.error('Error fetching movie data:', error);
+            // Still show the modal but without a trailer, runtime, and backdrop
             setSelectedMovie({
                 title: movie.title,
                 src: `https://image.tmdb.org/t/p/w300${movie.poster_path}`,
+                backdropSrc: null,
                 rating: movie.vote_average,
                 date: movie.release_date,
                 overview: movie.overview,
                 genre: movie.genre_ids,
-                trailerKey: null
+                trailerKey: null,
+                runtime: null
             });
             openModal();
         }
@@ -165,19 +222,26 @@ const NowPlaying = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange,
 
     // Add fetched movies to allMovies in App component
     useEffect(() => {
-        if (data.length > 0) {
-            data.forEach(movie => {
+        if (nowPlayingData.length > 0) {
+            nowPlayingData.forEach(movie => {
                 if (onAddMovie) {
                     onAddMovie(movie);
                 }
             });
         }
-    }, [data, onAddMovie]);
+
+        if (searchData.length > 0) {
+            searchData.forEach(movie => {
+                if (onAddMovie) {
+                    onAddMovie(movie);
+                }
+            });
+        }
+    }, [nowPlayingData, searchData, onAddMovie]);
         return (
         <div className="container">
-            <Navbar/>
             <div className="movie-list">
-                <h2>Movie List</h2>
+                <h2>{isSearching ? 'Search Results' : 'Now Playing Movies'}</h2>
                 <div className='sort-filter'>
                     <div className="sort-container">
                         <label htmlFor="sort-select">Sort by: </label>
@@ -224,19 +288,27 @@ const NowPlaying = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange,
                         />
                     ))}
                 </div>
-                {loading && <p>Loading...</p>}
-                {hasMore && !loading && <button onClick={loadMore} disabled={loading}>Load More</button>}
-                {!hasMore && !loading && <p>No more movies to load</p>}
+                {loading && <p className="loading">Loading...</p>}
+                {hasMore && !loading && (
+                    <div className="load-more-container">
+                        <button className="load-more-btn" onClick={loadMore} disabled={loading}>
+                            Load More
+                        </button>
+                    </div>
+                )}
+                {!hasMore && !loading && <p className="no-more-movies">No more movies to load</p>}
                 {error && <p className="error-message">Error: {error}</p>}
                 {showModal && selectedMovie && (
                     <Modal
                         title={selectedMovie.title}
                         src={selectedMovie.src}
+                        backdropSrc={selectedMovie.backdropSrc}
                         rating={selectedMovie.rating}
                         date={selectedMovie.date}
                         overview={selectedMovie.overview}
                         genre={getGenreNames(selectedMovie.genre)}
                         trailerKey={selectedMovie.trailerKey}
+                        runtime={selectedMovie.runtime}
                         handleClose={closeModal}
                     />
                 )}

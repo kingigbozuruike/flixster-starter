@@ -1,25 +1,247 @@
+.moviecard {
+    width: 200px;
+    height: 300px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    margin: 10px;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid rgba(182, 0, 0, 0.3);
+}
+
+.moviecard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    border-color: #b60000;
+}
+
 .imageholder {
-    height : 60%;
-    width : auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
 
 .imageholder img {
-    width : 100%;
-    height : 100%;
-    object-fit : contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
 }
 
-.moviecard {
-    display : flex;
-    flex-direction : column;
-    align-items : center;
-    justify-content : center;
-    width: 150px;
-    height: 300px;
+.moviecard:hover .imageholder img {
+    transform: scale(1.05);
+}
+
+/* Gradient overlay */
+.imageholder::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%);
+    z-index: 2;
+}
+
+.movieinfo {
+    position: absolute;
+    bottom: 50px;
+    left: 0;
+    width: 100%;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-sizing: border-box;
+    z-index: 3;
+}
+
+.movieinfo h3 {
+    margin: 0 0 8px 0;
+    color: #fff;
+    font-weight: 600;
+    line-height: 1.2;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-align: center;
+}
+
+.movieinfo span {
+    background-color: #b60000;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin: 0 auto;
+}
+
+.movieicons {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0 16px;
+    gap: 12px;
+    box-sizing: border-box;
+    z-index: 3;
+}
+
+.movieicons img.like {
+    height: 24px;
+    width: 24px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.movieicons img.like:hover {
+    transform: scale(1.2);
+}
+
+.watched-button {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+    border: 1px solid #ccc;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+}
+
+.watched-button.active {
+    background-color: #b60000;
+    color: white;
     border: 1px solid #b60000;
-    border-radius: 10px;
 }
 
-.movieicons img {
-    height: 25px;
+.watched-button:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: #fff;
+    color: #fff;
+}
+
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .moviecard {
+        width: 150px;
+        height: 225px;
+    }
+
+    .movieinfo {
+        bottom: 40px;
+        padding: 10px 14px;
+    }
+
+    .movieinfo h3 {
+        font-size: 0.9rem;
+    }
+
+    .movieinfo span {
+        font-size: 0.8rem;
+    }
+
+    .movieicons {
+        bottom: 6px;
+        padding: 0 12px;
+        gap: 10px;
+    }
+
+    .movieicons img.like {
+        height: 20px;
+        width: 20px;
+    }
+
+    .watched-button {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .moviecard {
+        width: 120px;
+        height: 180px;
+    }
+
+    .movieinfo {
+        bottom: 30px;
+        padding: 8px 12px;
+    }
+
+    .movieinfo h3 {
+        font-size: 0.8rem;
+    }
+
+    .movieinfo span {
+        font-size: 0.7rem;
+    }
+
+    .movieicons {
+        bottom: 4px;
+        padding: 0 10px;
+        gap: 8px;
+    }
+
+    .movieicons img.like {
+        height: 18px;
+        width: 18px;
+    }
+
+    .watched-button {
+        font-size: 0.65rem;
+        padding: 2px 5px;
+    }
+}
+@media (min-width: 2000px) {
+    .moviecard {
+        width: 250px;
+        height: 375px;
+    }
+
+    .movieinfo {
+        bottom: 60px;
+        padding: 14px 18px;
+    }
+
+    .movieinfo h3 {
+        font-size: 1.1rem;
+    }
+
+    .movieinfo span {
+        font-size: 1rem;
+    }
+
+    .movieicons {
+        bottom: 10px;
+        padding: 0 20px;
+        gap: 14px;
+    }
+
+    .movieicons img.like {
+        height: 28px;
+        width: 28px;
+    }
+
+    .watched-button {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
 }

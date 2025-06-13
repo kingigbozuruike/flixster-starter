@@ -181,9 +181,13 @@ const Search = ({ likedMovies, watchedMovies, onLikeChange, onWatchedChange, onA
                 trailerKey: null
             });
             openModal();
-        }
-    };
-
+        }}
+//     const handleKeyPress = (event) => {
+//         if (event.key === 'Enter') {
+//             searchResults(true);
+//         }
+//     };
+// }
     return (
     <div>
         <Navbar />

@@ -1,86 +1,51 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import './SideBar.css';
 
-const SideBar = ({ likedMovies, watchedMovies, allMovies, className }) => {
-    const [activeTab, setActiveTab] = useState('liked');
-
-  // Filter movies based on liked/watched status
-    const getLikedMovies = () => {
-        if (!allMovies || !likedMovies) return [];
-        return allMovies.filter(movie => likedMovies[movie.id]);
-    };
-
-    const getWatchedMovies = () => {
-        if (!allMovies || !watchedMovies) return [];
-        return allMovies.filter(movie => watchedMovies[movie.id]);
-    };
-
-    const likedMoviesList = getLikedMovies();
-    const watchedMoviesList = getWatchedMovies();
+const SideBar = ({ likedMovies, watchedMovies, className, onClose }) => {
+    const location = useLocation();
+    const likedCount = Object.values(likedMovies).filter(Boolean).length;
+    const watchedCount = Object.values(watchedMovies).filter(Boolean).length;
 
     return (
         <div className={`sidebar ${className || ''}`}>
-        <div className="sidebar-header">
-            <h3>My Movies</h3>
-            <div className="sidebar-tabs">
-            <button
-                className={activeTab === 'liked' ? 'active' : ''}
-                onClick={() => setActiveTab('liked')}
-            >
-                Liked ({likedMoviesList.length})
-            </button>
-            <button
-                className={activeTab === 'watched' ? 'active' : ''}
-                onClick={() => setActiveTab('watched')}
-            >
-                Watched ({watchedMoviesList.length})
-            </button>
-            </div>
-        </div>
+            <button className="sidebar-close-btn" onClick={onClose}>×</button>
 
-        <div className="sidebar-content">
-            {activeTab === 'liked' ? (
-            likedMoviesList.length > 0 ? (
-                <ul className="movie-list-sidebar">
-                {likedMoviesList.map(movie => (
-                    <li key={movie.id} className="movie-item">
-                    <img
-                        src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
-                        alt={movie.title}
-                        className="movie-thumbnail"
-                    />
-                    <div className="movie-details">
-                        <h4>{movie.title}</h4>
-                        <p>Rating: {movie.vote_average}</p>
-                    </div>
-                    </li>
-                ))}
-                </ul>
-            ) : (
-                <p className="empty-message">No liked movies yet</p>
-            )
-            ) : (
-            watchedMoviesList.length > 0 ? (
-                <ul className="movie-list-sidebar">
-                {watchedMoviesList.map(movie => (
-                    <li key={movie.id} className="movie-item">
-                    <img
-                        src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
-                        alt={movie.title}
-                        className="movie-thumbnail"
-                    />
-                    <div className="movie-details">
-                        <h4>{movie.title}</h4>
-                        <p>Rating: {movie.vote_average}</p>
-                    </div>
-                    </li>
-                ))}
-                </ul>
-            ) : (
-                <p className="empty-message">No watched movies yet</p>
-            )
-            )}
-        </div>
+            <div className="sidebar-header">
+                <h3>Navigation</h3>
+            </div>
+
+            <div className="sidebar-nav">
+                <Link
+                    to="/"
+                    className={location.pathname === '/' ? 'active' : ''}
+                    onClick={onClose}
+                >
+                    <span>Home</span>
+                </Link>
+
+                <Link
+                    to="/favorites"
+                    className={location.pathname === '/favorites' ? 'active' : ''}
+                    onClick={onClose}
+                >
+                    <span>Favorites</span>
+                    <span className="count-badge">{likedCount}</span>
+                </Link>
+
+                <Link
+                    to="/watched"
+                    className={location.pathname === '/watched' ? 'active' : ''}
+                    onClick={onClose}
+                >
+                    <span>Watched</span>
+                    <span className="count-badge">{watchedCount}</span>
+                </Link>
+            </div>
+
+            <div className="sidebar-footer">
+                <p>Flixster - Your Movie Companion</p>
+            </div>
         </div>
     );
 };

@@ -1,0 +1,100 @@
+.banner {
+  width: 100%;
+  position: relative;
+  padding: 20px 0; /* Reduced padding from 40px to 20px */
+  border-bottom: 2px solid #b60000;
+  box-shadow: 0 4px 12px rgba(182, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://pbs.twimg.com/media/FHyicBFXIAg-cT9?format=jpg&name=4096x4096');
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  opacity: 0.8;
+}
+
+.banner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 30%,
+    rgba(0, 0, 0, 0.7) 60%,
+    rgba(0, 0, 0, 0.4) 100%);
+  z-index: 1;
+}
+
+.banner-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.banner-logo {
+  flex: 0 0 auto;
+  margin-right: 30px;
+  position: relative;
+  z-index: 3;
+}
+
+.banner-logo img {
+  max-width: 250px;
+  height: auto;
+}
+
+.banner-text {
+  flex: 1;
+  color: white;
+  position: relative;
+  z-index: 3;
+}
+
+.banner-text h2 {
+  font-size: 1.8rem;
+  margin: 0 0 10px 0;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.banner-text p {
+  font-size: 1rem;
+  margin: 0;
+  color: #ddd;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 768px) {
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .banner-logo {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+
+  .banner-logo img {
+    max-width: 200px;
+  }
+
+  .banner-text h2 {
+    font-size: 1.5rem;
+  }
+}

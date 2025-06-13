@@ -1,28 +1,42 @@
 import { Link } from 'react-router-dom';
 import React from 'react';
-
-
+import './Footer.css';
 
 const Footer = () => {
   return (
     <footer className="footer">
-        <div className='nav-links'>
-            <Link to="/home">Now Playing</Link>
-            <Link to="/movies">Search</Link>
+      <div className="footer-content">
+        <div className="footer-logo">
+          <img src="/movie.png" alt="Flixster Logo" />
+          <h3>Flixster</h3>
         </div>
-        <div className='social-links'>
-            <a href="https://www.facebook.com/"><i className="fa-brands fa-facebook-f"></i></a>
-            <a href="https://www.instagram.com/"><i className="fa-brands fa-instagram"></i></a>
-            <a href="https://www.twitter.com/"><i className="fa-brands fa-twitter"></i></a>
-            <a href="https://www.youtube.com/"><i className="fa-brands fa-youtube"></i></a>
+
+        <div className="footer-links-container">
+          <div className="footer-section">
+            <h4>Navigation</h4>
+            <ul className="footer-links">
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/">Movies</Link></li>
+              <li><Link to="/">TV Shows</Link></li>
+              <li><Link to="/">New & Popular</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-section">
+            <h4>Legal</h4>
+            <ul className="footer-links">
+              <li><Link to="/">About Us</Link></li>
+              <li><Link to="/">Privacy Policy</Link></li>
+              <li><Link to="/">Terms of Service</Link></li>
+              <li><Link to="/">Contact Us</Link></li>
+            </ul>
+          </div>
         </div>
-        <div className='footer-links'>
-            <Link to="/about">About</Link>
-            <Link to="/contact">Contact</Link>
-            <Link to="/privacy">Privacy</Link>
-            <Link to="/terms">Terms</Link>
+
+        <div className="copyright">
+          <p>© {new Date().getFullYear()} Flixster. All rights reserved.</p>
         </div>
-        <p>Copyright © 2023 Meta. All rights reserved.</p>
+      </div>
     </footer>
   );
 };
